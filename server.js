@@ -17,13 +17,24 @@ http.listen(3000, () => {
     console.log('listening on *:3000');
 });
 
+
+// array of all lines drawn
+var line_history = [];
+
 io.on('connection', (socket) => {
     console.log('a user connected');
+
+    // first send the history to the new client
+    for (var i in line_history) {
+        socket.emit('draw-sync', { line: line_history[i] });
+    }
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
-    socket.on('draw', (msg) => {
-        console.log(JSON.stringify(msg));
-        io.emit('draw-sync', JSON.stringify(msg));
+    socket.on('draw', (data) => {
+        console.log(JSON.stringify(data));
+        line_history.push(data);
+        io.emit('draw-sync', { line: data });
     });
 });
